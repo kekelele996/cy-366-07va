@@ -151,6 +151,162 @@ body {
   font-weight: 700;
 }
 
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-head h2 {
+  margin: 0 0 6px;
+}
+
+.panel-head p {
+  margin: 0;
+  color: color-mix(in srgb, #162423 62%, #1b7f82 38%);
+  line-height: 1.6;
+}
+
+.inline-notice {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.empty-hint {
+  padding: 28px;
+  text-align: center;
+  color: color-mix(in srgb, #162423 55%, transparent);
+  border: 1px dashed color-mix(in srgb, #162423 22%, transparent);
+  border-radius: 8px;
+}
+
+.reservation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.reservation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, #162423 13%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, #f1f8f6 82%, white 18%);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-no {
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 55%, #1b7f82 45%);
+}
+
+.card-head h3 {
+  margin: 4px 0 0;
+  font-size: 19px;
+}
+
+.card-head h3 small {
+  font-weight: 500;
+  color: color-mix(in srgb, #162423 60%, transparent);
+}
+
+.card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin: 0;
+}
+
+.card-meta dt {
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 55%, transparent);
+}
+
+.card-meta dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.result-box {
+  margin-top: 22px;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+
+.result-box h3 {
+  margin: 0 0 10px;
+}
+
+.result-box p {
+  line-height: 1.7;
+  margin: 6px 0;
+}
+
+.result-box.is-success {
+  border-color: color-mix(in srgb, #1b7f82 45%, transparent);
+  background: color-mix(in srgb, #1b7f82 9%, white);
+}
+
+.result-box.is-fail {
+  border-color: color-mix(in srgb, #c65f44 50%, transparent);
+  background: color-mix(in srgb, #c65f44 10%, white);
+}
+
+.shortage-line strong {
+  font-size: 18px;
+  color: #c65f44;
+}
+
+.charge-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.charge-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid color-mix(in srgb, #162423 10%, transparent);
+}
+
+.sub-title {
+  margin: 26px 0 12px;
+  font-size: 17px;
+}
+
+.ops-row {
+  grid-template-columns: 1.2fr 1fr 1fr 0.9fr 1.2fr;
+}
+
+.charge-row {
+  grid-template-columns: 0.9fr 0.7fr 0.5fr 0.7fr 0.4fr 0.7fr 1.4fr;
+}
+
+.charge-breakdown {
+  color: color-mix(in srgb, #162423 78%, #1b7f82 22%);
+}
+
+.charge-detail {
+  color: color-mix(in srgb, #162423 70%, transparent);
+}
+
+.overview-grid {
+  margin-top: 18px;
+}
+
 @media (max-width: 860px) {
   .topbar {
     align-items: flex-start;
@@ -162,7 +318,9 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .plain-row {
+  .plain-row,
+  .ops-row,
+  .charge-row {
     grid-template-columns: 1fr;
   }
 }

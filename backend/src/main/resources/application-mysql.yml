@@ -1,0 +1,6 @@
+# MySQL 生产配置：数据源由 docker-compose 注入，
+# 表结构与种子数据通过 /docker-entrypoint-initdb.d 的 database/init.sql 初始化。
+spring:
+  sql:
+    init:
+      mode: never
