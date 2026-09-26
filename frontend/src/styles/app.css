@@ -166,3 +166,279 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== 前台开机 / 运营台通用 ===== */
+.page {
+  padding-bottom: 80px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.page-head h2 {
+  margin: 0 0 6px;
+  font-size: clamp(20px, 2.4vw, 28px);
+}
+
+.page-head p {
+  margin: 0;
+  color: color-mix(in srgb, #162423 66%, #1b7f82 34%);
+  line-height: 1.6;
+}
+
+.state-box {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.reservation-list,
+.session-card {
+  margin-top: 14px;
+}
+
+.reservation-card,
+.session-card {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, #162423 13%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, #f1f8f6 86%, white 14%);
+  box-shadow: 0 10px 30px color-mix(in srgb, #162423 8%, transparent);
+}
+
+.card-action {
+  display: flex;
+  align-items: flex-end;
+  min-width: 120px;
+}
+
+.card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-title strong {
+  font-size: 17px;
+}
+
+.verify-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 18px;
+  margin: 0;
+}
+
+.verify-grid dt {
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 55%, #1b7f82 45%);
+}
+
+.verify-grid dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+.verify-grid .is-low {
+  color: #c4563f;
+}
+
+.dialog-body {
+  padding: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.verify-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.verify-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px dashed color-mix(in srgb, #162423 16%, transparent);
+  font-size: 14px;
+}
+
+.verify-list li span {
+  color: color-mix(in srgb, #162423 60%, #1b7f82 40%);
+}
+
+.shortfall-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #c65f44 12%, white 88%);
+}
+
+.shortfall-box p {
+  margin: 4px 0;
+}
+
+.danger-text {
+  color: #c4563f;
+  font-size: 18px;
+}
+
+.hint {
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 60%, #1b7f82 40%);
+}
+
+.charge-box {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, #162423 12%, transparent);
+}
+
+.charge-title {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.charge-line {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+/* ===== 机位看板 ===== */
+.seat-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.seat-tile {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #162423 15%, transparent);
+  background: #fff;
+}
+
+.seat-tile .seat-no {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.seat-tile .seat-area {
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 62%, #1b7f82 38%);
+  margin: 2px 0 8px;
+}
+
+.seat-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.seat-rate {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.seat-idle {
+  background: color-mix(in srgb, #1b7f82 8%, white 92%);
+}
+
+.seat-in_use {
+  background: color-mix(in srgb, #c65f44 14%, white 86%);
+  border-color: color-mix(in srgb, #c65f44 45%, transparent);
+}
+
+.seat-reserved {
+  background: color-mix(in srgb, #e0a52d 14%, white 86%);
+}
+
+.seat-fault {
+  background: color-mix(in srgb, #162423 12%, white 88%);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+.legend .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.session-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.session-card {
+  flex-direction: column;
+}
+
+.session-area {
+  margin-left: 10px;
+  font-size: 13px;
+  color: color-mix(in srgb, #162423 60%, #1b7f82 40%);
+}
+
+.session-time {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.compact .charge-line {
+  grid-template-columns: 72px 1fr auto;
+}
+
+.sync-hint {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: color-mix(in srgb, #162423 55%, #1b7f82 45%);
+}
+
+@media (max-width: 860px) {
+  .reservation-card {
+    flex-direction: column;
+  }
+
+  .card-action {
+    width: 100%;
+  }
+
+  .verify-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+

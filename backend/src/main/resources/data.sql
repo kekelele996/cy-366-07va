@@ -1,96 +1,4 @@
--- 电竞馆上机管理系统 MySQL 8.0 初始化脚本
--- 后端容器启动时也会通过 spring.sql.init 执行 resources 下的兼容脚本；本文件供手工建库/挂载到
--- /docker-entrypoint-initdb.d 使用，可重复执行（表与种子数据均带 IF NOT EXISTS 保护）。
-
-CREATE TABLE IF NOT EXISTS members (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  member_no VARCHAR(32) NOT NULL UNIQUE,
-  name VARCHAR(80) NOT NULL,
-  balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS time_packages (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  member_id BIGINT NOT NULL,
-  package_name VARCHAR(80) NOT NULL,
-  total_minutes INT NOT NULL,
-  remaining_minutes INT NOT NULL,
-  expire_at TIMESTAMP NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_packages_member FOREIGN KEY (member_id) REFERENCES members(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS seats (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  seat_no VARCHAR(32) NOT NULL UNIQUE,
-  area VARCHAR(80) NOT NULL,
-  zone VARCHAR(40) NOT NULL,
-  seat_type VARCHAR(40) NOT NULL,
-  -- IDLE 空闲 / IN_USE 使用中 / RESERVED 已预约 / FAULT 故障
-  status VARCHAR(20) NOT NULL DEFAULT 'IDLE',
-  hourly_rate DECIMAL(10, 2) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS reservations (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  reservation_no VARCHAR(40) NOT NULL UNIQUE,
-  member_id BIGINT NOT NULL,
-  seat_id BIGINT NOT NULL,
-  start_time TIMESTAMP NOT NULL,
-  end_time TIMESTAMP NOT NULL,
-  -- RESERVED 已预约 / CHECKED_IN 已到店开机 / CANCELLED 已取消
-  status VARCHAR(20) NOT NULL DEFAULT 'RESERVED',
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_reservations_member FOREIGN KEY (member_id) REFERENCES members(id),
-  CONSTRAINT fk_reservations_seat FOREIGN KEY (seat_id) REFERENCES seats(id),
-  KEY idx_reservations_status_time (status, start_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS usage_sessions (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  member_id BIGINT NOT NULL,
-  seat_id BIGINT NOT NULL,
-  reservation_id BIGINT NULL,
-  start_time TIMESTAMP NOT NULL,
-  plan_end_time TIMESTAMP NOT NULL,
-  end_time TIMESTAMP NULL,
-  -- IN_USE 使用中 / FINISHED 已下机
-  status VARCHAR(20) NOT NULL DEFAULT 'IN_USE',
-  charged_minutes INT NOT NULL DEFAULT 0,
-  charge_summary VARCHAR(200),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_sessions_member FOREIGN KEY (member_id) REFERENCES members(id),
-  CONSTRAINT fk_sessions_seat FOREIGN KEY (seat_id) REFERENCES seats(id),
-  CONSTRAINT fk_sessions_reservation FOREIGN KEY (reservation_id) REFERENCES reservations(id),
-  KEY idx_sessions_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS charge_records (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  session_id BIGINT NOT NULL,
-  member_id BIGINT NOT NULL,
-  -- PACKAGE 时长包扣减 / BALANCE 余额扣减
-  charge_type VARCHAR(20) NOT NULL,
-  minutes INT NOT NULL DEFAULT 0,
-  amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_charges_session FOREIGN KEY (session_id) REFERENCES usage_sessions(id),
-  CONSTRAINT fk_charges_member FOREIGN KEY (member_id) REFERENCES members(id),
-  KEY idx_charges_session (session_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS operation_records (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  module_name VARCHAR(120) NOT NULL,
-  owner_name VARCHAR(80) NOT NULL,
-  status VARCHAR(40) NOT NULL,
-  metric VARCHAR(40) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ========== 演示数据 ==========
+-- 演示数据：会员（余额/时长包覆盖三种扣费场景）、机位、预约、一条上机中的会话
 
 INSERT INTO members (id, member_no, name, balance)
 SELECT 1, 'M001', '王一局', 50.00
@@ -108,13 +16,13 @@ WHERE NOT EXISTS (SELECT 1 FROM members WHERE member_no = 'M004');
 -- M001：充足时长包；M002：时长包+余额都不够首小时（单价 10 元，缺口 2 元）；
 -- M003：无时长包全靠余额；M004：30 分钟时长包 + 余额兜底
 INSERT INTO time_packages (member_id, package_name, total_minutes, remaining_minutes, expire_at)
-SELECT 1, '30 小时包', 1800, 1200, TIMESTAMPADD(MONTH, 1, NOW())
+SELECT 1, '30 小时包', 1800, 1200, TIMESTAMPADD(MONTH, 1, CURRENT_TIMESTAMP)
 WHERE NOT EXISTS (SELECT 1 FROM time_packages tp WHERE tp.member_id = 1);
 INSERT INTO time_packages (member_id, package_name, total_minutes, remaining_minutes, expire_at)
-SELECT 2, '10 小时包', 600, 30, TIMESTAMPADD(MONTH, 1, NOW())
+SELECT 2, '10 小时包', 600, 30, TIMESTAMPADD(MONTH, 1, CURRENT_TIMESTAMP)
 WHERE NOT EXISTS (SELECT 1 FROM time_packages tp WHERE tp.member_id = 2);
 INSERT INTO time_packages (member_id, package_name, total_minutes, remaining_minutes, expire_at)
-SELECT 4, '10 小时包', 600, 30, TIMESTAMPADD(MONTH, 1, NOW())
+SELECT 4, '10 小时包', 600, 30, TIMESTAMPADD(MONTH, 1, CURRENT_TIMESTAMP)
 WHERE NOT EXISTS (SELECT 1 FROM time_packages tp WHERE tp.member_id = 4 AND tp.remaining_minutes = 30);
 
 INSERT INTO seats (id, seat_no, area, zone, seat_type, status, hourly_rate)
@@ -146,47 +54,47 @@ WHERE NOT EXISTS (SELECT 1 FROM seats WHERE seat_no = 'A05');
 -- YY-1004 超出提前开机窗口，YY-1005 预约在故障机位上（用于核验拦截演示）
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 1, 'YY-1001', 1, 1,
-       TIMESTAMPADD(HOUR, -1, NOW()),
-       TIMESTAMPADD(HOUR, 3, NOW()),
+       TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 3, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1001');
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 2, 'YY-1002', 2, 2,
-       TIMESTAMPADD(MINUTE, -30, NOW()),
-       TIMESTAMPADD(HOUR, 3, NOW()),
+       TIMESTAMPADD(MINUTE, -30, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 3, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1002');
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 3, 'YY-1003', 3, 3,
-       TIMESTAMPADD(HOUR, -2, NOW()),
-       TIMESTAMPADD(HOUR, 2, NOW()),
+       TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 2, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1003');
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 4, 'YY-1004', 1, 5,
-       TIMESTAMPADD(HOUR, 6, NOW()),
-       TIMESTAMPADD(HOUR, 9, NOW()),
+       TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 9, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1004');
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 5, 'YY-1005', 2, 7,
-       TIMESTAMPADD(HOUR, -1, NOW()),
-       TIMESTAMPADD(HOUR, 2, NOW()),
+       TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 2, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1005');
 -- M004：时长包 30 分钟 + 余额兜底 30 分钟（5 元）的混合扣费成功场景
 INSERT INTO reservations (id, reservation_no, member_id, seat_id, start_time, end_time, status)
 SELECT 6, 'YY-1006', 4, 8,
-       TIMESTAMPADD(MINUTE, -15, NOW()),
-       TIMESTAMPADD(HOUR, 3, NOW()),
+       TIMESTAMPADD(MINUTE, -15, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 3, CURRENT_TIMESTAMP),
        'RESERVED'
 WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE reservation_no = 'YY-1006');
 
 -- 一条已在进行中的上机会话（运营台演示用）
 INSERT INTO usage_sessions (member_id, seat_id, reservation_id, start_time, plan_end_time, status, charged_minutes, charge_summary)
 SELECT 3, 6, NULL,
-       TIMESTAMPADD(HOUR, -2, NOW()),
-       TIMESTAMPADD(HOUR, 1, NOW()),
+       TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP),
+       TIMESTAMPADD(HOUR, 1, CURRENT_TIMESTAMP),
        'IN_USE', 180, '余额扣费 90.00 元'
 WHERE NOT EXISTS (
   SELECT 1 FROM usage_sessions WHERE member_id = 3 AND seat_id = 6 AND status = 'IN_USE'
